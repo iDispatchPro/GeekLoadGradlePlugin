@@ -1,0 +1,3 @@
+function main() {
+  http("https://google.com").get('').sync()
+}
