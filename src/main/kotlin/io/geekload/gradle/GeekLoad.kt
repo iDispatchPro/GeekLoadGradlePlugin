@@ -6,7 +6,6 @@ import java.util.*
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.task
 import java.io.ByteArrayOutputStream
-import java.lang.Math.max
 
 open class GeekLoadTask : DefaultTask()
 {
@@ -38,16 +37,18 @@ open class GeekLoadTask : DefaultTask()
     {
         fun cmd(command : String, noError : Boolean = false) : Int
         {
+            val output = ByteArrayOutputStream()
+
             return project.exec {
-                if (System.getProperty("os.name").lowercase().contains("win")) commandLine("cmd", "/c", command)
-                else commandLine("bash", "-c", command)
+                if (System.getProperty("os.name").lowercase().contains("win"))
+                    commandLine("cmd", "/c", command)
+                else
+                    commandLine("bash", "-c", command)
 
                 isIgnoreExitValue = noError
 
                 if (!noError)
                 {
-                    val output = ByteArrayOutputStream()
-
                     standardOutput = output
                     errorOutput = output
                 }
@@ -56,13 +57,8 @@ open class GeekLoadTask : DefaultTask()
 
         val container = "geekload4gradle"
 
-        fun isContainerExists(name : String) =
-            ProcessBuilder("docker", "inspect", "--format='{{.State.Running}}'", name).redirectErrorStream(true).start().inputStream.bufferedReader().readText().trim() == "'true'"
-
-        fun cleanUp()
-        {
-            if (isContainerExists(container)) cmd("docker rm -f $container")
-        }
+        fun cleanUp() =
+            cmd("docker rm -f $container")
 
         cleanUp()
 
@@ -76,7 +72,7 @@ open class GeekLoadTask : DefaultTask()
                 val root = path.split(pathDelim).first() + pathDelim
 
                 cmd("docker run -q -d --name $container -v $root:$rootName geekload/geekload-bundle:${GeekLoad.version}")
-                code = code.coerceAtLeast(cmd("docker exec $container java -jar application.jar -Xmx8g -run=\"${path.replace(root, "$rootName/")}\" -reportSet=medium -warningAsOk", true))
+                code = code.coerceAtLeast(cmd("docker exec $container java -jar application.jar -Xmx8g -run=\"${path.replace(root, "$rootName/")}\" -reportSet=medium -was -bundleStart", true))
             }
             finally
             {
