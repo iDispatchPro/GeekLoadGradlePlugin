@@ -16,7 +16,7 @@ repositories {
 }
 
 gradlePlugin {
-    website.set("https://geekload.io/documentation/gradle")
+    website.set("https://geekload.io/documentation/integration#gradle-plugin")
     vcsUrl.set("https://github.com/iDispatchPro/GeekLoadGradlePlugin")
 
     plugins {
